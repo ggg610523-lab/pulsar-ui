@@ -23,7 +23,12 @@ SOURCES = \
     hamburger.c \
     sidebar.c \
     dialogBox.c \
-    dropdownmenu.c
+    dropdownmenu.c \
+    progressBar.c \
+    tabs.c \
+    menuBar.c \
+    tooltips.c \
+    notifications.c
 
 OBJECTS = $(SOURCES:.c=.o)
 

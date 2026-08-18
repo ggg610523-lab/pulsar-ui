@@ -19,6 +19,11 @@
 #include "sidebar.h"
 #include "dialogBox.h"
 #include "dropdownmenu.h"
+#include "progressBar.h"
+#include "tabs.h"
+#include "menuBar.h"
+#include "tooltips.h"
+#include "notifications.h"
 
 static char *find_font(void)
 {
@@ -329,6 +334,13 @@ int main(void)
         0.58f
     );
 
+    UIProgressBar progressbar;
+
+    progress_bar_init(
+        &progressbar,
+        0.58f
+    );
+
     UIRadio radios[3];
 
     radio_init(
@@ -355,6 +367,27 @@ int main(void)
         &checkbox,
         "Enable reflections",
         true
+    );
+
+    UITabs tabs;
+
+    tabs_init(
+        &tabs
+    );
+
+    tabs_add(
+        &tabs,
+        "General"
+    );
+
+    tabs_add(
+        &tabs,
+        "Appearance"
+    );
+
+    tabs_add(
+        &tabs,
+        "Advanced"
     );
 
     UISearchBar searchbar;
@@ -395,6 +428,67 @@ int main(void)
         &hamburger
     );
 
+    UIMenuBar menubar;
+
+    menubar_init(
+        &menubar
+    );
+
+    menubar_add_menu(
+        &menubar,
+        "File"
+    );
+
+    menubar_add_item(
+        &menubar, 0, "New"
+    );
+
+    menubar_add_item(
+        &menubar, 0, "Open"
+    );
+
+    menubar_add_item(
+        &menubar, 0, "Save"
+    );
+
+    menubar_add_item(
+        &menubar, 0, "Exit"
+    );
+
+    menubar_add_menu(
+        &menubar,
+        "Edit"
+    );
+
+    menubar_add_item(
+        &menubar, 1, "Undo"
+    );
+
+    menubar_add_item(
+        &menubar, 1, "Redo"
+    );
+
+    menubar_add_item(
+        &menubar, 1, "Copy"
+    );
+
+    menubar_add_item(
+        &menubar, 1, "Paste"
+    );
+
+    menubar_add_menu(
+        &menubar,
+        "Help"
+    );
+
+    menubar_add_item(
+        &menubar, 2, "About"
+    );
+
+    menubar_add_item(
+        &menubar, 2, "Documentation"
+    );
+
     UISidebar sidebar;
 
     sidebar_init(
@@ -410,6 +504,25 @@ int main(void)
 
     UIContext ui;
     ui.dark = false;
+
+    UITooltipManager tooltips;
+
+    tooltip_manager_init(
+        &tooltips
+    );
+
+    NotificationManager notifications;
+
+    notif_manager_init(
+        &notifications
+    );
+
+    UIButton notifButton;
+
+    button_init(
+        &notifButton,
+        "Notify"
+    );
 
     bool running = true;
 
@@ -462,6 +575,14 @@ int main(void)
             385
         );
 
+        tabs_layout(
+            &tabs,
+            &ui,
+            570,
+            410,
+            450
+        );
+
         button_layout(
             &button,
             &ui,
@@ -486,6 +607,24 @@ int main(void)
             310,
             280,
             190
+        );
+
+        progress_bar_layout(
+            &progressbar,
+            &ui,
+            570,
+            490,
+            450,
+            12
+        );
+
+        button_layout(
+            &notifButton,
+            &ui,
+            570,
+            520,
+            120,
+            45
         );
 
         /*
@@ -545,6 +684,46 @@ int main(void)
             40
         );
 
+        menubar_layout(
+            &menubar,
+            &ui,
+            570,
+            15,
+            450
+        );
+
+        tooltip_manager_init(&tooltips);
+
+        tooltip_add(
+            &tooltips,
+            button.rect,
+            "Click to open dialog"
+        );
+
+        tooltip_add(
+            &tooltips,
+            primaryButton.rect,
+            "Primary action"
+        );
+
+        tooltip_add(
+            &tooltips,
+            slider.rect,
+            "Adjust material intensity"
+        );
+
+        tooltip_add(
+            &tooltips,
+            checkbox.rect,
+            "Toggle reflections"
+        );
+
+        tooltip_add(
+            &tooltips,
+            hamburger.rect,
+            "Open menu"
+        );
+
         /*
             Events.
         */
@@ -575,8 +754,18 @@ int main(void)
                 &event
             );
 
+            progress_bar_set_value(
+                &progressbar,
+                slider.value
+            );
+
             checkbox_event(
                 &checkbox,
+                &event
+            );
+
+            tabs_event(
+                &tabs,
                 &event
             );
 
@@ -592,6 +781,11 @@ int main(void)
 
             hamburger_event(
                 &hamburger,
+                &event
+            );
+
+            menubar_event(
+                &menubar,
                 &event
             );
 
@@ -652,6 +846,11 @@ int main(void)
                 &dialog,
                 &event
             );
+
+            button_event(
+                &notifButton,
+                &event
+            );
         }
 
         if (button.clicked) {
@@ -662,6 +861,14 @@ int main(void)
 
             printf(
                 "Primary button clicked\n"
+            );
+        }
+
+        if (notifButton.clicked) {
+
+            notif_push(
+                &notifications,
+                "Hello from notification!"
             );
         }
 
@@ -683,6 +890,17 @@ int main(void)
         static float prev_time = 0.0f;
         float dt = time - prev_time;
         prev_time = time;
+
+        tooltip_update(
+            &tooltips,
+            NULL,
+            dt
+        );
+
+        notif_update(
+            &notifications,
+            dt
+        );
 
         /*
             ------------------------------------------------
@@ -724,6 +942,18 @@ int main(void)
         );
 
         /*
+            Tabs.
+        */
+
+        tabs_draw(
+            &tabs,
+            &ui,
+            renderer,
+            font,
+            dt
+        );
+
+        /*
             Main panel.
         */
 
@@ -753,6 +983,13 @@ int main(void)
             &ui,
             renderer,
             font
+        );
+
+        progress_bar_draw(
+            &progressbar,
+            &ui,
+            renderer,
+            dt
         );
 
         checkbox_draw(
@@ -846,6 +1083,36 @@ int main(void)
             (int)(24 * ui.scale),
             false,
             ui.dark
+        );
+
+        /*
+            Tooltips (drawn on top of everything).
+        */
+
+        tooltip_draw(
+            &tooltips,
+            &ui,
+            renderer,
+            font
+        );
+
+        button_draw(
+            &notifButton,
+            &ui,
+            renderer,
+            font
+        );
+
+        /*
+            Menu bar.
+        */
+
+        menubar_draw(
+            &menubar,
+            &ui,
+            renderer,
+            font,
+            dt
         );
 
         /*
@@ -951,6 +1218,17 @@ int main(void)
             ui_theme(ui.dark,
                 (UIColor){65, 75, 95, 255},
                 (UIColor){155, 165, 185, 255})
+        );
+
+        /*
+            Notifications at native resolution.
+        */
+
+        notif_draw(
+            &notifications,
+            &ui,
+            renderer,
+            font
         );
 
         SDL_RenderPresent(
