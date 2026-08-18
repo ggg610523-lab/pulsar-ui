@@ -58,7 +58,7 @@ make
 After building, run the generated executable:
 
 ```bash
-./liquid-glass
+./liquid_glass
 ```
 
 > The executable name may vary depending on the project's Makefile configuration.
