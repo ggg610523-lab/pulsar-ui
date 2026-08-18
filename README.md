@@ -43,8 +43,8 @@ sudo apt-get install libsdl2-dev libsdl2-ttf-dev
 Clone the repository:
 
 ```bash
-git clone https://github.com/yourusername/PulsarUI.git
-cd PulsarUI
+git clone https://github.com/ggg610523-lab/pulsar-ui
+cd pulsar-ui
 ```
 
 Build the project using the Makefile:
