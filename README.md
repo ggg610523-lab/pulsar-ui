@@ -8,9 +8,8 @@
  `sudo pacman -S sdl2 sdl2-ttf`
 <br>
 <p> for debian based systems</p>
-
-\text{}$$ $$\text{sudo apt-get update
-sudo apt-get install libsdl2-dev libsdl2-ttf-dev}$$ $$\text{}$$
+```sudo apt-get update
+sudo apt-get install libsdl2-dev libsdl2-ttf-dev```
 
 <br>`
  <p> then run the makefile </p>
