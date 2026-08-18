@@ -9,6 +9,6 @@
 <br>
 <p> for debian based systems</p>
 `sudo apt-get update
-sudo apt-get install libsdl2-dev libsdl2-ttf-dev
+sudo apt-get install libsdl2-dev libsdl2-ttf-dev`
 <br>`
  <p> then run the makefile </p>
