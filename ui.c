@@ -898,7 +898,7 @@ void ui_glass(
    Text cache
    ============================================================ */
 
-#define TEXT_CACHE_SIZE 64
+#define TEXT_CACHE_SIZE 256
 
 typedef struct {
     const char *text;
