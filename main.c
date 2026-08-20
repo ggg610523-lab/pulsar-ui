@@ -161,7 +161,7 @@ int main(void)
 
     pulsarui_add_toggle(
         &pui, &themeToggle,
-        870, 80, 52, 26);
+        860, 78, 64, 32);
 
     pulsarui_link_sidebar(
         &pui, &sidebar, &hamburger);
