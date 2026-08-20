@@ -145,7 +145,7 @@ void tabs_draw(
         radius,
         ui_theme(ui->dark,
             (UIColor){255, 255, 255, 100},
-            (UIColor){70, 80, 110, 80})
+            (UIColor){35, 40, 60, 55})
     );
 
     for (int i = 0; i < tabs->count; i++) {

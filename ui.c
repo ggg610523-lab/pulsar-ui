@@ -213,31 +213,34 @@ void ui_fill_rounded_rect_gradient(
 
         SDL_RenderDrawLine(
             renderer,
-            left + 1,
-            rect.y + y,
-            right - 1,
-            rect.y + y
-        );
-
-        SDL_SetRenderDrawColor(
-            renderer,
-            c.r,
-            c.g,
-            c.b,
-            edge_a
-        );
-
-        SDL_RenderDrawPoint(
-            renderer,
             left,
-            rect.y + y
-        );
-
-        SDL_RenderDrawPoint(
-            renderer,
+            rect.y + y,
             right,
             rect.y + y
         );
+
+        if (frac > 0.01f) {
+
+            SDL_SetRenderDrawColor(
+                renderer,
+                c.r,
+                c.g,
+                c.b,
+                edge_a
+            );
+
+            SDL_RenderDrawPoint(
+                renderer,
+                left,
+                rect.y + y
+            );
+
+            SDL_RenderDrawPoint(
+                renderer,
+                right,
+                rect.y + y
+            );
+        }
     }
 }
 
@@ -411,31 +414,34 @@ void ui_fill_rounded_rect(
 
             SDL_RenderDrawLine(
                 renderer,
-                left + 1,
-                rect.y + y,
-                right - 1,
-                rect.y + y
-            );
-
-            SDL_SetRenderDrawColor(
-                renderer,
-                color.r,
-                color.g,
-                color.b,
-                edge_a
-            );
-
-            SDL_RenderDrawPoint(
-                renderer,
                 left,
-                rect.y + y
-            );
-
-            SDL_RenderDrawPoint(
-                renderer,
+                rect.y + y,
                 right,
                 rect.y + y
             );
+
+            if (frac > 0.01f) {
+
+                SDL_SetRenderDrawColor(
+                    renderer,
+                    color.r,
+                    color.g,
+                    color.b,
+                    edge_a
+                );
+
+                SDL_RenderDrawPoint(
+                    renderer,
+                    left,
+                    rect.y + y
+                );
+
+                SDL_RenderDrawPoint(
+                    renderer,
+                    right,
+                    rect.y + y
+                );
+            }
         }
     }
 }
@@ -888,8 +894,8 @@ void ui_glass(
             ? (UIColor){255, 255, 255, 150}
             : (UIColor){255, 255, 255, 105},
             active
-            ? (UIColor){100, 115, 150, 150}
-            : (UIColor){80, 90, 120, 105})
+            ? (UIColor){50, 55, 80, 80}
+            : (UIColor){35, 40, 60, 55})
     );
 }
 

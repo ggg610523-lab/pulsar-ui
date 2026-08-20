@@ -89,6 +89,12 @@ int main(void)
     UIButton notifButton;
     button_init(&notifButton, "Notify");
 
+    Orb orb;
+    orb_init(&orb, pui.renderer);
+
+    UIToggle themeToggle;
+    toggle_init(&themeToggle, false);
+
     /* -------------------------------------------------- */
     /*  REGISTER (toolkit handles layout + events + draw) */
     /* -------------------------------------------------- */
@@ -148,6 +154,14 @@ int main(void)
     pulsarui_add_button(
         &pui, &notifButton,
         570, 520, 120, 45);
+
+    pulsarui_add_orb(
+        &pui, &orb,
+        640, 530, 200, 200);
+
+    pulsarui_add_toggle(
+        &pui, &themeToggle,
+        870, 80, 52, 26);
 
     pulsarui_link_sidebar(
         &pui, &sidebar, &hamburger);

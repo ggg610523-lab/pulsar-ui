@@ -22,6 +22,9 @@
 #include "notifications.h"
 #include "background.h"
 #include "imageWidget.h"
+#include "textinput.h"
+#include "orb.h"
+#include "toggle.h"
 
 #define PULSAR_MAX_WIDGETS 64
 
@@ -59,6 +62,18 @@ typedef struct {
     UIHamburger *hamburger;
     UISlider *progress_slider;
     UIProgressBar *progress_bar;
+
+    int focus_count;
+    void *focus_widgets[64];
+    int focus_idx;
+
+    float fade_alpha;
+    float fade_target;
+    bool fade_switched;
+
+    UIToggle *theme_toggle;
+
+    Orb *top_orb;
 } PulsarUI;
 
 typedef void (*PulsarEventFn)(
@@ -172,6 +187,35 @@ void pulsarui_add_image(
     ImageWidget *w,
     float x, float y,
     float w2, float h
+);
+
+void pulsarui_add_textinput(
+    PulsarUI *pui,
+    UITextInput *w,
+    float x, float y,
+    float w2, float h
+);
+
+void pulsarui_add_orb(
+    PulsarUI *pui,
+    Orb *w,
+    float x, float y,
+    float w2, float h
+);
+
+void pulsarui_add_toggle(
+    PulsarUI *pui,
+    UIToggle *w,
+    float x, float y,
+    float w2, float h
+);
+
+void pulsarui_focus_next(
+    PulsarUI *pui
+);
+
+void pulsarui_focus_prev(
+    PulsarUI *pui
 );
 
 void pulsarui_link_sidebar(

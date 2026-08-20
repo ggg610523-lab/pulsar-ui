@@ -33,7 +33,10 @@ SOURCES = \
     tooltips.c \
     notifications.c \
     image.c \
-    imageWidget.c
+    imageWidget.c \
+    textinput.c \
+    orb.c \
+    toggle.c
 
 OBJECTS = $(SOURCES:.c=.o)
 

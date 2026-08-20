@@ -591,6 +591,131 @@ void pulsarui_add_image(
         x, y, w2, h);
 }
 
+static void wl_textinput(
+    void *d, PulsarUI *pui,
+    float x, float y,
+    float w, float h)
+{
+    textinput_layout(
+        d, &pui->ui, x, y, w, h);
+}
+
+static void we_textinput(
+    void *d, SDL_Event *e)
+{
+    textinput_event(d, e);
+}
+
+static void wd_textinput(
+    void *d, PulsarUI *pui)
+{
+    textinput_draw(
+        d, &pui->ui,
+        pui->renderer,
+        pui->font,
+        pui->smooth_dt
+    );
+}
+
+void pulsarui_add_textinput(
+    PulsarUI *pui,
+    UITextInput *w,
+    float x, float y,
+    float w2, float h)
+{
+    add_widget(pui, w,
+        we_textinput,
+        wd_textinput,
+        wl_textinput,
+        x, y, w2, h
+    );
+
+    if (pui->focus_count < 64) {
+        pui->focus_widgets[
+            pui->focus_count++] = w;
+    }
+}
+
+void pulsarui_add_orb(
+    PulsarUI *pui,
+    Orb *w,
+    float x, float y,
+    float w2, float h)
+{
+    (void)pui;
+    w->dx = x;
+    w->dy = y;
+    w->dw = w2;
+    w->dh = h;
+
+    pui->top_orb = w;
+}
+
+static void wl_toggle(
+    void *d, PulsarUI *pui,
+    float x, float y,
+    float w, float h)
+{
+    toggle_layout(d, &pui->ui, x, y, w, h);
+}
+
+static void we_toggle(
+    void *d, SDL_Event *e)
+{
+    toggle_event(d, e);
+}
+
+static void wd_toggle(
+    void *d, PulsarUI *pui)
+{
+    toggle_draw(
+        d, &pui->ui,
+        pui->renderer,
+        pui->font);
+}
+
+void pulsarui_add_toggle(
+    PulsarUI *pui,
+    UIToggle *w,
+    float x, float y,
+    float w2, float h)
+{
+    add_widget(pui, w,
+        we_toggle,
+        wd_toggle,
+        wl_toggle,
+        x, y, w2, h
+    );
+
+    pui->theme_toggle = w;
+}
+
+void pulsarui_focus_next(
+    PulsarUI *pui)
+{
+    if (pui->focus_count == 0)
+        return;
+
+    pui->focus_idx++;
+
+    if (pui->focus_idx >=
+        pui->focus_count)
+        pui->focus_idx = 0;
+}
+
+void pulsarui_focus_prev(
+    PulsarUI *pui)
+{
+    if (pui->focus_count == 0)
+        return;
+
+    pui->focus_idx--;
+
+    if (pui->focus_idx < 0)
+        pui->focus_idx =
+            pui->focus_count - 1;
+}
+
 /* -------------------------------------------------- */
 /*  Link helpers                                      */
 /* -------------------------------------------------- */
@@ -718,6 +843,10 @@ int pulsarui_init(
     pui->bg_w = 0;
     pui->bg_h = 0;
     pui->bg_dark = false;
+    pui->fade_alpha = 0.0f;
+    pui->fade_target = 0.0f;
+    pui->fade_switched = false;
+    pui->theme_toggle = NULL;
     pui->start =
         SDL_GetPerformanceCounter();
     pui->time = 0.0f;
@@ -733,6 +862,11 @@ int pulsarui_init(
     pui->hamburger = NULL;
     pui->progress_slider = NULL;
     pui->progress_bar = NULL;
+
+    pui->focus_count = 0;
+    pui->focus_idx = 0;
+
+    pui->top_orb = NULL;
 
     tooltip_manager_init(
         &pui->tooltips
@@ -943,7 +1077,17 @@ void pulsarui_end(
             event.key.keysym.sym ==
             SDLK_d
         )
-            pui->ui.dark = !pui->ui.dark;
+        {
+            if (pui->theme_toggle) {
+                pui->theme_toggle->on =
+                    !pui->theme_toggle->on;
+            }
+
+            if (pui->fade_target == 0.0f) {
+                pui->fade_target = 1.0f;
+                pui->fade_switched = false;
+            }
+        }
 
         for (int i = 0;
              i < pui->widget_count;
@@ -956,6 +1100,20 @@ void pulsarui_end(
                 wd->on_event(
                     wd->data, &event);
         }
+
+        if (event.type == SDL_KEYDOWN &&
+            event.key.keysym.sym ==
+            SDLK_TAB)
+        {
+            bool shift =
+                event.key.keysym.mod &
+                KMOD_SHIFT;
+
+            if (shift)
+                pulsarui_focus_prev(pui);
+            else
+                pulsarui_focus_next(pui);
+        }
     }
 
     if (pui->hamburger && pui->sidebar) {
@@ -966,6 +1124,40 @@ void pulsarui_end(
 
         pui->hamburger->open =
             pui->sidebar->open;
+    }
+
+    if (pui->theme_toggle &&
+        pui->theme_toggle->clicked)
+    {
+        if (pui->fade_target == 0.0f) {
+            pui->fade_target = 1.0f;
+            pui->fade_switched = false;
+        }
+    }
+
+    if (pui->fade_target != 0.0f ||
+        pui->fade_alpha > 0.001f)
+    {
+        float diff =
+            pui->fade_target - pui->fade_alpha;
+
+        if (fabsf(diff) < 0.01f) {
+
+            pui->fade_alpha = pui->fade_target;
+
+            if (!pui->fade_switched &&
+                pui->fade_target > 0.5f)
+            {
+                pui->ui.dark =
+                    !pui->ui.dark;
+                ui_text_cache_clear();
+                pui->fade_switched = true;
+                pui->fade_target = 0.0f;
+            }
+        } else {
+            pui->fade_alpha +=
+                diff * 8.0f * pui->smooth_dt;
+        }
     }
 
     if (pui->progress_slider &&
@@ -997,6 +1189,30 @@ void pulsarui_end(
         if (wd->on_draw)
             wd->on_draw(
                 wd->data, pui);
+    }
+
+    if (pui->top_orb &&
+        pui->top_orb->visible)
+    {
+        orb_update(
+            pui->top_orb,
+            pui->smooth_dt
+        );
+
+        pui->top_orb->rect =
+            ui_rect(
+                &pui->ui,
+                pui->top_orb->dx,
+                pui->top_orb->dy,
+                pui->top_orb->dw,
+                pui->top_orb->dh
+            );
+
+        orb_draw(
+            pui->top_orb,
+            pui->renderer,
+            pui->top_orb->rect
+        );
     }
 
     tooltip_draw(
@@ -1036,6 +1252,22 @@ void pulsarui_end(
         NULL,
         &dst
     );
+
+    if (pui->fade_alpha > 0.01f) {
+
+        SDL_SetRenderDrawBlendMode(
+            pui->renderer,
+            SDL_BLENDMODE_BLEND);
+
+        SDL_SetRenderDrawColor(
+            pui->renderer,
+            0, 0, 0,
+            (Uint8)(pui->fade_alpha * 255.0f));
+
+        SDL_RenderFillRect(
+            pui->renderer,
+            &dst);
+    }
 }
 
 void pulsarui_present(
